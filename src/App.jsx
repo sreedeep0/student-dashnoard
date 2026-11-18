@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useLocalStorage from './hooks/useLocalStorage';
 import useAcademicCalculations from './hooks/useAcademicCalculations';
 import Navbar from './components/Navbar';
@@ -60,6 +60,31 @@ export default function App() {
   const [attendance, setAttendance] = useLocalStorage('academic_attendance_v1', []);
   const [assignments, setAssignments] = useLocalStorage('academic_assignments_v1', []);
   const [gpaScale, setGpaScale] = useLocalStorage('academic_gpa_scale_v1', '4.0');
+  const [passingMark, setPassingMark] = useLocalStorage('academic_passing_mark_v1', 50);
+
+  const [passingMarkInput, setPassingMarkInput] = useState(String(passingMark));
+  const [passingMarkError, setPassingMarkError] = useState('');
+
+  useEffect(() => {
+    setPassingMarkInput(String(passingMark));
+  }, [passingMark]);
+
+  const handleApplyPassingMark = (e) => {
+    if (e) e.preventDefault();
+    const str = String(passingMarkInput).trim();
+    if (str === '' || isNaN(Number(str))) {
+      setPassingMarkError('Please enter a valid number');
+      return;
+    }
+    const num = parseFloat(str);
+    if (num <= 0 || num > 100) {
+      setPassingMarkError('Passing mark must be > 0 and ≤ 100');
+      return;
+    }
+    setPassingMark(num);
+    setPassingMarkInput(String(num));
+    setPassingMarkError('');
+  };
 
   // Modal dialog states
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
@@ -244,7 +269,7 @@ export default function App() {
               </p>
             </div>
 
-            <div className="flex items-center gap-6 text-sm bg-slate-50 border border-slate-200 rounded px-4 py-2 self-start md:self-auto">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm bg-slate-50 border border-slate-200 rounded px-4 py-2 self-start md:self-auto">
               <div>
                 <span className="text-xs text-slate-500 block">Current GPA</span>
                 <span className="text-base font-bold text-slate-900">
@@ -253,11 +278,42 @@ export default function App() {
                     : '—'}
                 </span>
               </div>
-              <div className="border-l border-slate-300 pl-6">
+              <div className="border-l border-slate-300 pl-4 sm:pl-6">
                 <span className="text-xs text-slate-500 block">Overall Attendance</span>
                 <span className={`text-base font-bold ${calculations.overallAttendanceWarning ? 'text-red-700' : 'text-slate-900'}`}>
                   {calculations.hasAttendanceData && calculations.overallAttendancePct !== null ? `${calculations.overallAttendancePct}%` : '—'}
                 </span>
+              </div>
+              <div className="border-l border-slate-300 pl-4 sm:pl-6">
+                <span className="text-xs text-slate-500 block">Passing Mark</span>
+                <form onSubmit={handleApplyPassingMark} className="flex items-center gap-1.5 mt-0.5">
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      step="any"
+                      min="0.01"
+                      max="100"
+                      value={passingMarkInput}
+                      onChange={(e) => {
+                        setPassingMarkInput(e.target.value);
+                        setPassingMarkError('');
+                      }}
+                      className="w-16 px-2 py-0.5 text-xs border border-slate-300 rounded font-bold text-slate-900 focus:outline-none focus:border-blue-600 bg-white"
+                      aria-label="Passing Mark Percentage"
+                    />
+                    <span className="text-xs font-bold text-slate-600 ml-1">%</span>
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-2 py-0.5 bg-blue-700 hover:bg-blue-800 text-white rounded text-xs font-medium transition-colors"
+                    title="Apply passing mark"
+                  >
+                    Set
+                  </button>
+                </form>
+                {passingMarkError && (
+                  <span className="text-[10px] text-red-600 block mt-0.5 font-medium">{passingMarkError}</span>
+                )}
               </div>
             </div>
           </div>
@@ -286,7 +342,7 @@ export default function App() {
 
         {/* 2. Visualizations: Marks Bar Chart and Term-over-Term Trend */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MarksBarChart subjects={calculations.enrichedSubjects} />
+          <MarksBarChart subjects={calculations.enrichedSubjects} passingMark={passingMark} />
           <TrendLineChart
             termTrends={calculations.termTrends}
             gpaScale={gpaScale}
@@ -327,6 +383,7 @@ export default function App() {
           onEditSubject={handleEditSubject}
           onDeleteSubject={handleDeleteSubject}
           gpaScale={gpaScale}
+          passingMark={passingMark}
         />
 
       </main>

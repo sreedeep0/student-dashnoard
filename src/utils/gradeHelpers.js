@@ -8,7 +8,7 @@ export const GRADE_SCALE = [
   { min: 70, letter: 'B', gpa: 3.0, label: 'Good', color: 'text-blue-600 bg-blue-50 border-blue-200' },
   { min: 60, letter: 'C', gpa: 2.0, label: 'Satisfactory', color: 'text-amber-600 bg-amber-50 border-amber-200' },
   { min: 50, letter: 'D', gpa: 1.0, label: 'Pass', color: 'text-orange-600 bg-orange-50 border-orange-200' },
-  { min: 0,  letter: 'F', gpa: 0.0, label: 'Fail', color: 'text-rose-600 bg-rose-50 border-rose-200' },
+  { min: 0, letter: 'F', gpa: 0.0, label: 'Fail', color: 'text-rose-600 bg-rose-50 border-rose-200' },
 ];
 
 /**
@@ -18,7 +18,7 @@ export const GRADE_SCALE = [
 export function calculateGrade(score) {
   const numericScore = Number(score) || 0;
   const clamped = Math.max(0, Math.min(100, numericScore));
-  
+
   const found = GRADE_SCALE.find(item => clamped >= item.min) || GRADE_SCALE[GRADE_SCALE.length - 1];
   return {
     letter: found.letter,

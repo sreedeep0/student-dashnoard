@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 export default function AttendanceTracker({
   enrichedSubjects = [],
@@ -6,6 +6,29 @@ export default function AttendanceTracker({
   onQuickMiss,
   onOpenAttendanceModal
 }) {
+  const availableTerms = useMemo(() => {
+    const terms = new Set();
+    enrichedSubjects.forEach((s) => {
+      if (s.term && String(s.term).trim()) {
+        terms.add(String(s.term).trim());
+      }
+    });
+    return Array.from(terms).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  }, [enrichedSubjects]);
+
+  const [selectedTerm, setSelectedTerm] = useState('All Terms');
+
+  useEffect(() => {
+    if (selectedTerm !== 'All Terms' && !availableTerms.includes(selectedTerm)) {
+      setSelectedTerm('All Terms');
+    }
+  }, [availableTerms, selectedTerm]);
+
+  const displayedSubjects = useMemo(() => {
+    if (selectedTerm === 'All Terms') return enrichedSubjects;
+    return enrichedSubjects.filter((s) => (s.term || '').trim() === selectedTerm);
+  }, [enrichedSubjects, selectedTerm]);
+
   const getStatus = (hasData, pct) => {
     if (!hasData || pct === null) {
       return { label: 'Not Recorded', badge: 'bg-slate-100 text-slate-600 border-slate-300', bar: 'bg-slate-300' };
@@ -26,23 +49,49 @@ export default function AttendanceTracker({
           <h3 className="text-base font-bold text-slate-800">Subject Attendance Monitor</h3>
           <p className="text-xs text-slate-500">Track class attendance and 75% minimum eligibility</p>
         </div>
-        <button
-          type="button"
-          onClick={onOpenAttendanceModal}
-          disabled={enrichedSubjects.length === 0}
-          className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded text-xs font-medium transition-colors disabled:opacity-50 self-start sm:self-auto"
-        >
-          Update Attendance Record
-        </button>
+        <div className="flex items-center space-x-2.5 self-start sm:self-auto">
+          {availableTerms.length > 0 && (
+            <div className="flex items-center space-x-1.5">
+              <label htmlFor="attendance-term-filter" className="text-xs font-semibold text-slate-600">
+                Term:
+              </label>
+              <select
+                id="attendance-term-filter"
+                value={selectedTerm}
+                onChange={(e) => setSelectedTerm(e.target.value)}
+                className="px-2.5 py-1.5 text-xs border border-slate-300 rounded focus:outline-none focus:border-blue-600 bg-white font-medium text-slate-700"
+              >
+                <option value="All Terms">All Terms</option>
+                {availableTerms.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onOpenAttendanceModal}
+            disabled={enrichedSubjects.length === 0}
+            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded text-xs font-medium transition-colors disabled:opacity-50"
+          >
+            Update Attendance Record
+          </button>
+        </div>
       </div>
 
       {enrichedSubjects.length === 0 ? (
         <div className="text-center py-8 text-slate-500 text-sm">
           No registered subjects found. Add your first subject to start tracking attendance.
         </div>
+      ) : displayedSubjects.length === 0 ? (
+        <div className="text-center py-8 text-slate-500 text-sm border border-dashed border-slate-200 rounded mt-4">
+          No subjects found for {selectedTerm}.
+        </div>
       ) : (
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {enrichedSubjects.map((sub) => {
+          {displayedSubjects.map((sub) => {
             const att = sub.attendance;
             const hasData = Boolean(att && att.hasData && att.totalClasses > 0);
             const total = hasData ? att.totalClasses : 0;
@@ -57,8 +106,8 @@ export default function AttendanceTracker({
                 requirementNote = `Needs ~${needed} more consecutive classes to reach 75%`;
               } else {
                 const canMiss = Math.floor((attended - 0.75 * total) / 0.75);
-                requirementNote = canMiss > 0 
-                  ? `Can miss up to ${canMiss} class${canMiss > 1 ? 'es' : ''} safely` 
+                requirementNote = canMiss > 0
+                  ? `Can miss up to ${canMiss} class${canMiss > 1 ? 'es' : ''} safely`
                   : 'On track (maintain attendance to stay ≥75%)';
               }
             } else {
@@ -66,8 +115,8 @@ export default function AttendanceTracker({
             }
 
             return (
-              <div 
-                key={sub.id} 
+              <div
+                key={sub.id}
                 className="border border-slate-200 rounded p-3.5 bg-slate-50/50 flex flex-col justify-between"
               >
                 <div>
@@ -93,7 +142,7 @@ export default function AttendanceTracker({
 
                   {/* Simple Flat Progress Bar */}
                   <div className="mt-2 w-full bg-slate-200 rounded h-2 overflow-hidden">
-                    <div 
+                    <div
                       className={`h-2 rounded transition-all duration-200 ${status.bar}`}
                       style={{ width: `${hasData ? Math.min(100, Math.max(0, pct)) : 0}%` }}
                     />
