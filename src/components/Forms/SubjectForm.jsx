@@ -15,9 +15,11 @@ export default function SubjectForm({ isOpen, onClose, onSave, initialData = nul
       setFormData({
         name: initialData.name || '',
         term: initialData.term || 'Term 1',
-        score: initialData.score !== undefined ? String(initialData.score) : '',
-        maxScore: initialData.maxScore ? String(initialData.maxScore) : '100',
-        credits: initialData.credits ? String(initialData.credits) : '3',
+        score: initialData.rawScore !== undefined && initialData.rawScore !== null
+          ? String(initialData.rawScore)
+          : (initialData.score !== undefined && initialData.score !== null ? String(initialData.score) : ''),
+        maxScore: initialData.maxScore !== undefined && initialData.maxScore !== null ? String(initialData.maxScore) : '100',
+        credits: initialData.credits !== undefined && initialData.credits !== null ? String(initialData.credits) : '3',
       });
     } else {
       setFormData({
@@ -47,13 +49,13 @@ export default function SubjectForm({ isOpen, onClose, onSave, initialData = nul
       setError('Please enter a valid number for Marks Obtained.');
       return;
     }
-    const numScore = Number(scoreStr);
+    const numScore = parseFloat(scoreStr);
 
     if (maxScoreStr === '' || isNaN(Number(maxScoreStr))) {
       setError('Please enter a valid number for Maximum Marks.');
       return;
     }
-    const numMax = Number(maxScoreStr);
+    const numMax = parseFloat(maxScoreStr);
 
     if (numMax <= 0) {
       setError('Maximum Marks must be greater than zero.');
@@ -77,13 +79,13 @@ export default function SubjectForm({ isOpen, onClose, onSave, initialData = nul
     }
 
     // Convert score to normalized percentage if maxScore is different
-    const normalizedScore = numMax === 100 ? numScore : Math.round((numScore / numMax) * 100);
+    const percentage = numMax === 100 ? numScore : (numScore / numMax) * 100;
 
     onSave({
       id: initialData ? initialData.id : Date.now().toString(),
       name: formData.name.trim(),
       term: formData.term,
-      score: normalizedScore,
+      score: percentage,
       credits: numCredits,
       rawScore: numScore,
       maxScore: numMax,
@@ -171,6 +173,7 @@ export default function SubjectForm({ isOpen, onClose, onSave, initialData = nul
               </label>
               <input
                 type="number"
+                step="any"
                 min="0"
                 max={Number(formData.maxScore) > 0 ? formData.maxScore : undefined}
                 required
@@ -187,6 +190,7 @@ export default function SubjectForm({ isOpen, onClose, onSave, initialData = nul
               </label>
               <input
                 type="number"
+                step="any"
                 min="1"
                 required
                 value={formData.maxScore}
