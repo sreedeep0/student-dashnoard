@@ -1,11 +1,12 @@
 import React from 'react';
-import { calculateGrade } from '../utils/gradeHelpers.js';
+import { calculateGrade, convertGpaForDisplay } from '../utils/gradeHelpers.js';
 
 export default function SubjectList({
   subjects = [],
   onOpenSubjectModal,
   onEditSubject,
   onDeleteSubject,
+  gpaScale = '4.0',
 }) {
   return (
     <div className="bg-white border border-slate-300 rounded p-4">
@@ -37,7 +38,7 @@ export default function SubjectList({
                 <th className="py-2.5 px-3 text-center">Credits</th>
                 <th className="py-2.5 px-3 text-center">Score (%)</th>
                 <th className="py-2.5 px-3 text-center">Letter Grade</th>
-                <th className="py-2.5 px-3 text-center">Grade Point</th>
+                <th className="py-2.5 px-3 text-center">Grade Point ({gpaScale})</th>
                 <th className="py-2.5 px-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -64,7 +65,7 @@ export default function SubjectList({
                       </span>
                     </td>
                     <td className="py-2.5 px-3 text-center font-medium text-slate-800">
-                      {gradeInfo.gpa.toFixed(1)}
+                      {convertGpaForDisplay(gradeInfo.gpa, gpaScale).toFixed(1)}
                     </td>
                     <td className="py-2.5 px-3 text-right">
                       <div className="inline-flex items-center space-x-2">

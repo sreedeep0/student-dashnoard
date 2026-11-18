@@ -16,6 +16,8 @@ export default function MetricCards({
   totalAssignments = 0,
   completionRate = null,
   attendanceAlerts = [],
+  gpaScale = '4.0',
+  gpaDenominator = '4.00',
 }) {
   return (
     <div className="space-y-4">
@@ -46,7 +48,7 @@ export default function MetricCards({
           {hasSubjects && overallGpa !== null ? (
             <>
               <div className="mt-2 text-2xl font-bold text-slate-900">
-                {overallGpa.toFixed(2)} <span className="text-sm font-normal text-slate-500">/ 4.00</span>
+                {overallGpa.toFixed(2)} <span className="text-sm font-normal text-slate-500">/ {gpaDenominator}</span>
               </div>
               <div className="mt-2 text-xs text-slate-600 flex justify-between">
                 <span>Grade: <strong>{overallGrade}</strong></span>

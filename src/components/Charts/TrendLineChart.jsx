@@ -10,7 +10,7 @@ import {
   Legend,
 } from 'recharts';
 
-export default function TrendLineChart({ termTrends = [] }) {
+export default function TrendLineChart({ termTrends = [], gpaScale = '4.0', gpaDenominator = '4.00' }) {
   if (!termTrends || termTrends.length === 0) {
     return (
       <div className="bg-white border border-slate-300 rounded p-6 flex flex-col items-center justify-center h-80 text-center">
@@ -27,7 +27,7 @@ export default function TrendLineChart({ termTrends = [] }) {
       <div className="bg-white border border-slate-300 rounded p-6 flex flex-col items-center justify-center h-80 text-center">
         <h3 className="text-base font-bold text-slate-800 mb-1">Term-over-Term Trend</h3>
         <p className="text-slate-700 text-sm font-medium mb-1">
-          Currently 1 term recorded ({termTrends[0].term}: Average {termTrends[0].averageScore}%, GPA {termTrends[0].gpa.toFixed(2)})
+          Currently 1 term recorded ({termTrends[0].term}: Average {termTrends[0].averageScore}%, GPA {termTrends[0].gpa.toFixed(2)} / {gpaDenominator})
         </p>
         <p className="text-slate-500 text-xs max-w-sm mt-1">
           Add subjects under additional terms (e.g. Term 2) to display a comparative performance trend line.
@@ -64,20 +64,20 @@ export default function TrendLineChart({ termTrends = [] }) {
               axisLine={{ stroke: '#cbd5e1' }}
               tickFormatter={(v) => `${v}%`}
             />
-            {/* Right Axis: GPA (0 to 4.0) */}
+            {/* Right Axis: GPA */}
             <YAxis 
               yAxisId="right" 
               orientation="right" 
               stroke="#16a34a" 
               fontSize={12} 
-              domain={[0, 4.0]} 
+              domain={[0, gpaScale === '10.0' ? 10.0 : 4.0]} 
               tickLine={false}
               axisLine={{ stroke: '#cbd5e1' }}
               tickFormatter={(v) => `${v.toFixed(1)}`}
             />
             <Tooltip 
               formatter={(value, name) => [
-                name === 'Average Score (%)' ? `${value}%` : value,
+                name.includes('GPA') ? `${Number(value).toFixed(2)} / ${gpaDenominator}` : `${value}%`,
                 name
               ]}
               contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '4px', fontSize: '12px' }}
@@ -101,7 +101,7 @@ export default function TrendLineChart({ termTrends = [] }) {
               yAxisId="right"
               type="linear"
               dataKey="gpa"
-              name="Cumulative GPA"
+              name={`Cumulative GPA (${gpaScale})`}
               stroke="#16a34a"
               strokeWidth={2}
               strokeDasharray="4 4"

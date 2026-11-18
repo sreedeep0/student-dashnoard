@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
-import { calculateGrade, calculateWeightedAverage } from '../utils/gradeHelpers.js';
+import { calculateGrade, calculateWeightedAverage, convertGpaForDisplay, getGpaScaleDenominator } from '../utils/gradeHelpers.js';
 
-export function useAcademicCalculations({ subjects = [], attendance = [], assignments = [] }) {
+export function useAcademicCalculations({ subjects = [], attendance = [], assignments = [], gpaScale = '4.0' }) {
   return useMemo(() => {
-    // 1. Overall GPA and Marks
+    // 1. Overall GPA and Marks (Canonical 4.0 scale)
     const weighted = calculateWeightedAverage(subjects);
+    const displayGpa = convertGpaForDisplay(weighted.overallGpa, gpaScale);
+    const gpaDenominator = getGpaScaleDenominator(gpaScale);
 
     // 2. Attendance metrics
     let totalClassesHeld = 0;
@@ -95,16 +97,23 @@ export function useAcademicCalculations({ subjects = [], attendance = [], assign
       }
     });
 
-    const termTrends = Object.values(termMap).map(t => ({
-      term: t.term,
-      averageScore: t.totalCredits > 0 ? Math.round((t.totalScore / t.totalCredits) * 10) / 10 : 0,
-      gpa: t.totalCredits > 0 ? Math.round((t.totalGpa / t.totalCredits) * 100) / 100 : 0,
-    }));
+    const termTrends = Object.values(termMap).map(t => {
+      const canonicalTermGpa = t.totalCredits > 0 ? Math.round((t.totalGpa / t.totalCredits) * 100) / 100 : 0;
+      return {
+        term: t.term,
+        averageScore: t.totalCredits > 0 ? Math.round((t.totalScore / t.totalCredits) * 10) / 10 : 0,
+        canonicalGpa: canonicalTermGpa,
+        gpa: convertGpaForDisplay(canonicalTermGpa, gpaScale),
+      };
+    });
 
     return {
       hasSubjects: weighted.hasData,
       averageScore: weighted.averageScore,
-      overallGpa: weighted.overallGpa,
+      overallGpa: displayGpa,
+      canonicalOverallGpa: weighted.overallGpa,
+      gpaScale,
+      gpaDenominator,
       overallGrade: weighted.letter,
       gradeColor: weighted.color,
       totalCredits: weighted.totalCredits,
@@ -128,7 +137,7 @@ export function useAcademicCalculations({ subjects = [], attendance = [], assign
       // Trends
       termTrends,
     };
-  }, [subjects, attendance, assignments]);
+  }, [subjects, attendance, assignments, gpaScale]);
 }
 
 export default useAcademicCalculations;

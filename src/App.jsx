@@ -20,9 +20,9 @@ function cleanupLegacyDemoData() {
     if (rawSubjects) {
       const parsed = JSON.parse(rawSubjects);
       if (Array.isArray(parsed) && parsed.length === 3 &&
-          parsed.some(s => s.name === 'Mathematics' && s.id === '1') &&
-          parsed.some(s => s.name === 'Computer Science' && s.id === '2') &&
-          parsed.some(s => s.name === 'Physics' && s.id === '3')) {
+        parsed.some(s => s.name === 'Mathematics' && s.id === '1') &&
+        parsed.some(s => s.name === 'Computer Science' && s.id === '2') &&
+        parsed.some(s => s.name === 'Physics' && s.id === '3')) {
         window.localStorage.removeItem('academic_subjects_v1');
       }
     }
@@ -31,9 +31,9 @@ function cleanupLegacyDemoData() {
     if (rawAttendance) {
       const parsed = JSON.parse(rawAttendance);
       if (Array.isArray(parsed) && parsed.length === 3 &&
-          parsed.some(a => a.subjectId === '1' && a.totalClasses === 40) &&
-          parsed.some(a => a.subjectId === '2' && a.totalClasses === 45) &&
-          parsed.some(a => a.subjectId === '3' && a.totalClasses === 38)) {
+        parsed.some(a => a.subjectId === '1' && a.totalClasses === 40) &&
+        parsed.some(a => a.subjectId === '2' && a.totalClasses === 45) &&
+        parsed.some(a => a.subjectId === '3' && a.totalClasses === 38)) {
         window.localStorage.removeItem('academic_attendance_v1');
       }
     }
@@ -42,8 +42,8 @@ function cleanupLegacyDemoData() {
     if (rawAssignments) {
       const parsed = JSON.parse(rawAssignments);
       if (Array.isArray(parsed) && parsed.length === 2 &&
-          parsed.some(a => a.title === 'Data Structures Lab 3' && a.id === '1') &&
-          parsed.some(a => a.title === 'Calculus Problem Set 2' && a.id === '2')) {
+        parsed.some(a => a.title === 'Data Structures Lab 3' && a.id === '1') &&
+        parsed.some(a => a.title === 'Calculus Problem Set 2' && a.id === '2')) {
         window.localStorage.removeItem('academic_assignments_v1');
       }
     }
@@ -59,6 +59,7 @@ export default function App() {
   const [subjects, setSubjects] = useLocalStorage('academic_subjects_v1', []);
   const [attendance, setAttendance] = useLocalStorage('academic_attendance_v1', []);
   const [assignments, setAssignments] = useLocalStorage('academic_assignments_v1', []);
+  const [gpaScale, setGpaScale] = useLocalStorage('academic_gpa_scale_v1', '4.0');
 
   // Modal dialog states
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
@@ -75,6 +76,7 @@ export default function App() {
     subjects,
     attendance,
     assignments,
+    gpaScale,
   });
 
   // ================= SUBJECT HANDLERS =================
@@ -222,11 +224,14 @@ export default function App() {
         overallGpa={calculations.overallGpa}
         overallGrade={calculations.overallGrade}
         hasSubjects={calculations.hasSubjects}
+        gpaScale={gpaScale}
+        onScaleChange={setGpaScale}
+        gpaDenominator={calculations.gpaDenominator}
       />
 
       {/* Main Dashboard Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        
+
         {/* Simple Heading / Overview Section */}
         <div className="bg-white border border-slate-300 rounded p-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -243,7 +248,9 @@ export default function App() {
               <div>
                 <span className="text-xs text-slate-500 block">Current GPA</span>
                 <span className="text-base font-bold text-slate-900">
-                  {calculations.hasSubjects && calculations.overallGpa !== null ? `${calculations.overallGpa.toFixed(2)} (${calculations.overallGrade})` : '—'}
+                  {calculations.hasSubjects && calculations.overallGpa !== null
+                    ? `${calculations.overallGpa.toFixed(2)} / ${calculations.gpaDenominator} (${calculations.overallGrade})`
+                    : '—'}
                 </span>
               </div>
               <div className="border-l border-slate-300 pl-6">
@@ -273,12 +280,18 @@ export default function App() {
           totalAssignments={calculations.totalAssignments}
           completionRate={calculations.completionRate}
           attendanceAlerts={calculations.attendanceAlerts}
+          gpaScale={gpaScale}
+          gpaDenominator={calculations.gpaDenominator}
         />
 
         {/* 2. Visualizations: Marks Bar Chart and Term-over-Term Trend */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <MarksBarChart subjects={calculations.enrichedSubjects} />
-          <TrendLineChart termTrends={calculations.termTrends} />
+          <TrendLineChart
+            termTrends={calculations.termTrends}
+            gpaScale={gpaScale}
+            gpaDenominator={calculations.gpaDenominator}
+          />
         </div>
 
         {/* 3. Subject Attendance Monitor */}
@@ -313,6 +326,7 @@ export default function App() {
           }}
           onEditSubject={handleEditSubject}
           onDeleteSubject={handleDeleteSubject}
+          gpaScale={gpaScale}
         />
 
       </main>

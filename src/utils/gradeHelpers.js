@@ -88,3 +88,32 @@ export function calculateWeightedAverage(subjects = []) {
   };
 }
 
+/**
+ * Converts a canonical 4.0-scale GPA value to the selected display scale ('4.0' or '10.0').
+ * Uses the linear display conversion: 10-point scale = 4-point scale * 2.5
+ * @param {number|null} gpa4 - Canonical GPA on 4.0 scale
+ * @param {'4.0'|'10.0'} scale - Target scale
+ * @returns {number|null} Converted GPA value rounded to 2 decimal places
+ */
+export function convertGpaForDisplay(gpa4, scale = '4.0') {
+  if (gpa4 === null || gpa4 === undefined || isNaN(Number(gpa4))) {
+    return null;
+  }
+  const numeric = Number(gpa4);
+  if (scale === '10.0') {
+    const converted = Math.min(10.0, Math.max(0.0, numeric * 2.5));
+    return Math.round(converted * 100) / 100;
+  }
+  const clamped = Math.min(4.0, Math.max(0.0, numeric));
+  return Math.round(clamped * 100) / 100;
+}
+
+/**
+ * Returns the standard denominator string for the given GPA scale ('4.00' or '10.00').
+ * @param {'4.0'|'10.0'} scale
+ * @returns {string}
+ */
+export function getGpaScaleDenominator(scale = '4.0') {
+  return scale === '10.0' ? '10.00' : '4.00';
+}
+
