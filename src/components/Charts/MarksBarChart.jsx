@@ -73,7 +73,6 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
               Term:
             </label>
 
-            // Creates a dropdown that allows users to filter marks by academic term.
             <select
               id="chart-term-filter"
               value={selectedTerm}
@@ -101,7 +100,6 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
          // Chart is displayed here.
         <div className="h-80 w-full">
 
-          // Makes the bar chart fit its parent container and supplies the filtered subject dataset.
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={displayedSubjects} margin={{ top: 15, right: 20, left: -10, bottom: 20 }}>
 
