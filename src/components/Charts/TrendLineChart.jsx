@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 
 export default function TrendLineChart({ termTrends = [], gpaScale = '4.0', gpaDenominator = '4.00' }) {
+  //Checking whether data exists
   if (!termTrends || termTrends.length === 0) {
     return (
       <div className="bg-white border border-slate-300 rounded p-6 flex flex-col items-center justify-center h-80 text-center">
@@ -36,6 +37,7 @@ export default function TrendLineChart({ termTrends = [], gpaScale = '4.0', gpaD
     );
   }
 
+  //Creating the chart layout
   return (
     <div className="bg-white border border-slate-300 rounded p-4 flex flex-col justify-between">
       <div className="mb-3">
@@ -45,6 +47,8 @@ export default function TrendLineChart({ termTrends = [], gpaScale = '4.0', gpaD
 
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
+
+          //Creating the actual Line Chart
           <LineChart data={termTrends} margin={{ top: 15, right: 20, left: -10, bottom: 25 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
             <XAxis 
