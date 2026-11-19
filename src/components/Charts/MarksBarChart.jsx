@@ -92,7 +92,6 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
       </div>
 
 
-        // Displays a message when the selected term contains no valid subjects.
       {displayedSubjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-72 text-center text-slate-500 text-sm border border-dashed border-slate-200 rounded">
           No subjects recorded for {selectedTerm}.
@@ -106,10 +105,8 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={displayedSubjects} margin={{ top: 15, right: 20, left: -10, bottom: 20 }}>
 
-              // Adds horizontal grid lines to make chart values easier to read.
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
 
-              // Displays subject names along the horizontal axis with rotated labels.
               <XAxis
                 dataKey="name"
                 stroke="#475569"
@@ -124,7 +121,6 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
                 dy={4}
               />
 
-              // Displays marks percentages from 0% to 100% on the vertical axis.
               <YAxis
                 stroke="#475569"
                 fontSize={12}
@@ -134,14 +130,12 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
                 tickFormatter={(v) => `${v}%`}
               />
 
-              // Shows the subject's marks percentage and Pass/Fail status when hovered over.
               <Tooltip
                 formatter={(value) => [`${value}% (${Number(value) >= effectivePassingMark ? 'Pass' : 'Fail'})`, 'Score']}
                 labelStyle={{ fontWeight: 'bold', color: '#1e293b' }}
                 contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '4px', fontSize: '12px' }}
               />
 
-              // Draws a red dashed horizontal line indicating the minimum passing mark.
               <ReferenceLine
                 y={effectivePassingMark}
                 stroke="#dc2626"
@@ -149,7 +143,6 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
                 label={{ value: `Passing Threshold (${effectivePassingMark}%)`, position: 'insideTopLeft', fill: '#dc2626', fontSize: 11 }}
               />
 
-              // Draws subject marks as bars, using red for failing scores and blue for passing scores.
               <Bar
                 dataKey="score"
                 fill="#2563eb"
