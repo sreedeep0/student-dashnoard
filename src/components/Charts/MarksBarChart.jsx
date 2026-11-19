@@ -62,7 +62,6 @@ export default function MarksBarChart({ subjects = [], passingMark = 50 }) {
     <div className="bg-white border border-slate-300 rounded p-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
 
-        // Displays the chart title and the current minimum passing percentage.
         <div>
           <h3 className="text-base font-bold text-slate-800">Subject Marks Comparison</h3>
           <p className="text-xs text-slate-500">Marks obtained vs. {effectivePassingMark}% minimum passing threshold</p>
